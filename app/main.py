@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 
 BUILTINS = {"exit", "echo", "type"}
@@ -42,7 +43,12 @@ def main():
                     print(f"{name}: not found")
             continue
 
-        print(f"{command}: command not found")
+        path = find_executable(args[0])
+        if path:
+            subprocess.run(args, executable=path)
+            continue
+
+        print(f"{args[0]}: command not found")
 
 if __name__ == "__main__":
     main()

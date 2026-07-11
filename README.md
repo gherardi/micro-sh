@@ -2,7 +2,7 @@
 
 A POSIX-ish shell built for the [CodeCrafters "Build your own Shell"](https://codecrafters.io/challenges/shell) challenge.
 
-It reads a line, splits it into a command and arguments, and dispatches to a builtin. Anything unrecognized prints a `command not found` message. Running external programs comes in a later stage — for now only `type` resolves them, via a `PATH` search.
+It reads a line, splits it into a command and arguments, and dispatches to a builtin. If the command isn't a builtin, the shell searches `PATH` for a matching executable and runs it with the given arguments. If nothing matches, it prints a `command not found` message.
 
 ## Running
 
@@ -26,6 +26,10 @@ Requires [uv](https://docs.astral.sh/uv/) and Python 3.14 (pinned in `.python-ve
 2. Otherwise search each directory in `PATH`, in order, for a file with that name that has the execute bit set. The first match prints `<name> is <full_path>`. Files that exist but are not executable are skipped, as are `PATH` entries that don't exist on disk.
 3. If nothing matches, print `<name>: not found`.
 
+## External programs
+
+Any command that isn't a builtin is resolved with the same `PATH` search `type` uses, then run in a child process with the command-line arguments passed through. The program receives the name as typed as its `argv[0]`, not the resolved path.
+
 Example session:
 
 ```
@@ -35,6 +39,8 @@ $ type echo
 echo is a shell builtin
 $ type ls
 ls is /bin/ls
+$ ls /nonexistent
+ls: /nonexistent: No such file or directory
 $ type nonexistent
 nonexistent: not found
 $ nonexistent
@@ -44,7 +50,7 @@ $ exit 0
 
 ## Layout
 
-- `app/main.py` — the REPL, builtin dispatch, and `find_executable()` for the `PATH` search. `BUILTINS` is the single source of truth for builtin names.
+- `app/main.py` — the REPL, builtin dispatch, and `find_executable()` for the `PATH` search, shared by `type` and external-program execution. `BUILTINS` is the single source of truth for builtin names.
 - `your_program.sh` — local runner; mirrors `.codecrafters/run.sh`, which is what CodeCrafters runs remotely.
 - `codecrafters.yml` — buildpack / debug settings for the remote runner.
 
