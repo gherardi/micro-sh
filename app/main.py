@@ -1,5 +1,7 @@
 import sys
 
+BUILTINS = {"exit", "echo", "type"}
+
 def main():
     while True:
         try:
@@ -17,6 +19,14 @@ def main():
 
         if args[0] == "echo":
             print(" ".join(args[1:]))
+            continue
+
+        if args[0] == "type":
+            for name in args[1:]:
+                if name in BUILTINS:
+                    print(f"{name} is a shell builtin")
+                else:
+                    print(f"{name}: not found")
             continue
 
         print(f"{command}: command not found")
